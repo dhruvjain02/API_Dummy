@@ -78,19 +78,20 @@ def submit():
         image_placeholders = [
             '[0]', '[30]', '[60]', '[90]', '[240]', '[270]', '[360]'
         ]
-        for table in document.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    for placeholder, image_key in zip(image_placeholders, image_keys):
-                        if placeholder in cell.text and image_key in request.files:
-                            image_file = request.files[image_key]
-                            if image_file and image_file.filename:
-                                # Replace placeholder and insert image
-                                cell.text = ""
-                                run = cell.paragraphs[0].add_run()
-                                image_stream = io.BytesIO(image_file.read())
-                                run.add_picture(image_stream, width=Inches(2.5))
-                                print(f"Inserted image for {image_key} at {placeholder}")
+        for placeholder, image_key in zip(image_placeholders, image_keys):
+            if image_key in request.files:
+                image_file = request.files[image_key]
+                if image_file and image_file.filename:
+                    # Replace placeholder and insert image
+                    for table in document.tables:
+                        for row in table.rows:
+                            for cell in row.cells:
+                                if placeholder in cell.text:
+                                    cell.text = ""
+                                    run = cell.paragraphs[0].add_run()
+                                    image_stream = io.BytesIO(image_file.read())
+                                    run.add_picture(image_stream, width=Inches(2.5))
+                                    print(f"Inserted image for {image_key} at {placeholder}")
 
         # Save the document to a buffer
         buffer = io.BytesIO()
