@@ -71,7 +71,7 @@ def submit():
                         if placeholder in cell.text:
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Insert images
+        # Insert images for each angle placeholder
         image_keys = [
             'image_0', 'image_30', 'image_60', 'image_90', 'image_240', 'image_270', 'image_360'
         ]
@@ -91,7 +91,8 @@ def submit():
                         for row in table.rows:
                             for cell in row.cells:
                                 if placeholder in cell.text:
-                                    cell.text = ""
+                                    print(f"Inserting image for {image_key} at placeholder {placeholder}...")
+                                    cell.text = ""  # Clear the placeholder
                                     run = cell.paragraphs[0].add_run()
                                     
                                     # Reset the file pointer and read the image
@@ -99,7 +100,6 @@ def submit():
                                     image_stream = io.BytesIO(image_file.read())
                                     run.add_picture(image_stream, width=Inches(2.5))
                                     inserted = True
-                                    print(f"Inserted image for {image_key} at placeholder {placeholder}")
 
                     if not inserted:
                         print(f"No placeholder found for {image_key} in the document.")
