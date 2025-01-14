@@ -82,7 +82,11 @@ def submit():
             if image_key in request.files:
                 image_file = request.files[image_key]
                 if image_file and image_file.filename:
-                    # Replace placeholder and insert image
+                    # Debug: Check if the image is found and uploaded correctly
+                    print(f"Image {image_key} received with filename: {image_file.filename}")
+
+                    # Replace placeholder and insert image in all tables
+                    inserted = False  # Track if image was inserted
                     for table in document.tables:
                         for row in table.rows:
                             for cell in row.cells:
@@ -94,7 +98,11 @@ def submit():
                                     image_file.stream.seek(0)
                                     image_stream = io.BytesIO(image_file.read())
                                     run.add_picture(image_stream, width=Inches(2.5))
-                                    print(f"Inserted image for {image_key} at {placeholder}")
+                                    inserted = True
+                                    print(f"Inserted image for {image_key} at placeholder {placeholder}")
+
+                    if not inserted:
+                        print(f"No placeholder found for {image_key} in the document.")
 
         # Save the document to a buffer
         buffer = io.BytesIO()
