@@ -1,127 +1,742 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Forensics Report Form</title>
+    <title>Mobile Device Information Form</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #00181b;
+            color: #032a52;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            box-sizing: border-box;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #012e42;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #022937;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #0077b6;
+            padding-bottom: 10px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 30px;
+            width: 160px;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .split-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .camera-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .guide-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .camera-preview, .guide-image {
+            width: 100%;
+            max-width: 480px;
+            height: 360px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .guide-image {
+            background: #fff;
+            border: 2px solid #0077b6;
+        }
+
+        .angle-indicator {
+            text-align: center;
+            font-size: 24px;
+            margin: 10px 0;
+            color: #0077b6;
+            width: 100%;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .camera-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .camera-btn {
+            background-color: #0077b6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .camera-btn:hover {
+            background-color: #005f8d;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #0077b6;
+        }
+
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+            color: #05527c;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            background-color: #e0f7fa;
+            color: #2c3e50;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-error {
+            border-color: #de0000;
+            box-shadow: 0 0 8px rgba(245, 7, 7, 0.2);
+        }
+
+        /* Camera Styles */
+        .camera-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .camera-preview {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .angle-indicator {
+            text-align: center;
+            font-size: 24px;
+            margin: 10px 0;
+            color: #0077b6;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #0077b6;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .camera-btn {
+            background-color: #0077b6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .camera-btn:hover {
+            background-color: #005f8d;
+        }
+
+        .photo-progress {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #0077b6;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Original form styles continue... */
+        button {
+            background-color: #0077b6;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005f8d;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Mobile Forensics Report Submission</h1>
-    <form action="/submit" method="POST" enctype="multipart/form-data">
-        <h2>Case Information</h2>
-        <label for="case_number">Case Number:</label>
-        <input type="text" id="case_number" name="case_number" required><br><br>
+    <img src="https://static.wixstatic.com/media/e48a18_c949f6282e6a4c8e9568f40916a0c704~mv2.png/v1/crop/x_0,y_151,w_1920,h_746/fill/w_240,h_93,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_auto/For%20Dark%20Theme.png"
+        alt="DeepCytes Logo" class="logo">
 
-        <label for="date_of_report">Date of Report:</label>
-        <input type="date" id="date_of_report" name="date_of_report" required><br><br>
+    <div class="container">
+        <h1>Mobile Device Information Form</h1>
+        <form method="POST" action="/submit" enctype="multipart/form-data">
+            <!-- Case Information -->
+            <div class="form-section active">
+                <h2>Case Specifications</h2>
 
-        <label for="report_prepared_by">Report Prepared By:</label>
-        <input type="text" id="report_prepared_by" name="report_prepared_by" required><br><br>
+                <label for="case_number">Case Number:</label>
+                <input type="text" id="case_number" name="case_number" required>
 
-        <h2>Device Specifications</h2>
-        <label for="model">Device Model:</label>
-        <input type="text" id="model" name="model"><br><br>
+                <label for="date_of_report">Date of Report:</label>
+                <input type="text" id="date_of_report" name="date_of_report" required>
 
-        <label for="color">Color:</label>
-        <input type="text" id="color" name="color"><br><br>
+                <label for="report_prepared_by">Report Prepared By (Name and Title):</label>
+                <input type="text" id="report_prepared_by" name="report_prepared_by" required>
 
-        <label for="safety_glass">Safety Glass (Yes/No):</label>
-        <input type="text" id="safety_glass" name="safety_glass"><br><br>
+                <div class="button-container">
+                    <button type="button" onclick="nextSection()">Next</button>
+                </div>
+            </div>
 
-        <label for="back_cover">Back Cover (Yes/No):</label>
-        <input type="text" id="back_cover" name="back_cover"><br><br>
+            <!-- Device Photography -->
+            <div class="form-section">
+                <h2>Device Photography</h2>
+                <p class="instructions">Please capture photos of the device from the following angles: 0°, 30°, 60°, 90°, and after flipping: 30°, 60°, 90°</p>
 
-        <label for="ram">RAM:</label>
-        <input type="text" id="ram" name="ram"><br><br>
+                <div class="split-container">
+                    <div class="camera-side">
+                        <video id="camera" autoplay playsinline class="camera-preview"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <div class="angle-indicator">
+                            <span id="current-angle">0°</span>
+                            <span id="flip-status">(Front)</span>
+                        </div>
+                        <div class="camera-controls">
+                            <button type="button" id="capture-btn" class="camera-btn">
+                                <span id="capture-text">Capture (0°)</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-side">
+                        <img id="guide-image" class="guide-image" src="/static/images/guide_0.png" alt="Guide for current angle">
+                        <div class="instructions">
+                            Follow the guide image to capture the device at the correct angle
+                        </div>
+                    </div>
+                </div>
 
-        <label for="internal_memory">Internal Memory:</label>
-        <input type="text" id="internal_memory" name="internal_memory"><br><br>
+                <div class="preview-grid" id="preview-container">
+                    <!-- Preview images will be added here -->
+                </div>
 
-        <label for="camera_specs">Camera Details:</label>
-        <input type="text" id="camera_specs" name="camera_specs"><br><br>
+                <div class="photo-progress">
+                    <div class="progress-indicator">
+                        <span id="photos-taken">0</span>/7 photos taken
+                    </div>
+                </div>
 
-        <label for="cameras_check">Cameras Check:</label>
-        <input type="text" id="cameras_check" name="cameras_check"><br><br>
+                <div class="button-container">
+                    <button type="button" onclick="previousSection()">Previous</button>
+                    <button type="button" onclick="validateAndNext()">Next</button>
+                </div>
+            </div>
 
-        <label for="battery_percentage">Battery Percentage:</label>
-        <input type="text" id="battery_percentage" name="battery_percentage"><br><br>
+            <!-- Original form sections continue... -->
+            <!-- Device Specifications -->
+            <div class="form-section">
+                <!-- Your existing Device Specifications section -->
+                <h2>Device Specifications</h2>
 
-        <label for="sim_slots">SIM Slots:</label>
-        <input type="text" id="sim_slots" name="sim_slots"><br><br>
+                <label for="model">Model:</label>
+                <input type="text" id="model" name="model" required>
 
-        <label for="sim_provider">SIM Provider:</label>
-        <input type="text" id="sim_provider" name="sim_provider"><br><br>
+                <label for="color">Color:</label>
+                <input type="text" id="color" name="color" required>
 
-        <h2>Connectivity & Storage</h2>
-        <label for="wifi_connected">Wi-Fi Connected (Yes/No):</label>
-        <input type="text" id="wifi_connected" name="wifi_connected"><br><br>
+                <div class="form-group"  style="display: inline-block;">
+                    <label>With Safety Glass:</label>
+                    <input type="radio" id="safety_glass_yes" name="safety_glass" value="yes" required>
+                    <label for="safety_glass_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="safety_glass_no" name="safety_glass" value="no" required>
+                    <label for="safety_glass_no"  style="display: inline-block;">No</label>
+                </div>
 
-        <label for="bluetooth_status">Bluetooth Status:</label>
-        <input type="text" id="bluetooth_status" name="bluetooth_status"><br><br>
+                <div class="form-group">
+                    <label>With Back Cover:</label>
+                    <input type="radio" id="back_cover_yes" name="back_cover" value="yes" required>
+                    <label for="back_cover_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="back_cover_no" name="back_cover" value="no" required>
+                    <label for="back_cover_no"  style="display: inline-block;">No</label>
+                </div>
 
-        <label for="sd_card">SD Card Present (Yes/No):</label>
-        <input type="text" id="sd_card" name="sd_card"><br><br>
+                <label for="ram">RAM:</label>
+                <input type="text" id="ram" name="ram"required>
 
-        <label for="sd_capacity">SD Capacity:</label>
-        <input type="text" id="sd_capacity" name="sd_capacity"><br><br>
+                <label for="internal_memory">Internal Memory:</label>
+                <input type="text" id="internal_memory" name="internal_memory" required>
 
-        <h2>System Information</h2>
-        <label for="mobile_uptime">Mobile Uptime:</label>
-        <input type="text" id="mobile_uptime" name="mobile_uptime"><br><br>
+                <label for="camera_specs">Camera (with Specs):</label>
+                <textarea id="camera_specs" name="camera_specs" required></textarea>
 
-        <label for="time_zone">Time Zone:</label>
-        <input type="text" id="time_zone" name="time_zone"><br><br>
+                <div class="form-group"  style="display: inline-block;">
+                    <label>Check if all cameras are present:</label>
+                    <input type="radio" id="cameras_check_yes" name="cameras_check" value="yes" required>
+                    <label for="cameras_check_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="cameras_check_no" name="cameras_check" value="no" required>
+                    <label for="cameras_check_no"  style="display: inline-block;">No</label>
+                </div>
 
-        <label for="language">Language:</label>
-        <input type="text" id="language" name="language"><br><br>
+                <label for="battery_percentage">Battery Percentage:</label>
+                <input type="number" id="battery_percentage" name="battery_percentage" min="0" max="100" required>
 
-        <label for="installed_apps">Installed Apps:</label>
-        <input type="text" id="installed_apps" name="installed_apps"><br><br>
+                <label for="sim_slots">Number of SIM card slots:</label>
+                <input type="number" id="sim_slots" name="sim_slots" min="1" required>
 
-        <label for="geo_location">Geo Location:</label>
-        <input type="text" id="geo_location" name="geo_location"><br><br>
+                <label for="sim_provider">SIM Cards and their Providers:</label>
+                <textarea id="sim_provider" name="sim_provider" required></textarea>
 
-        <label for="build_no">Build Number:</label>
-        <input type="text" id="build_no" name="build_no"><br><br>
+                <div class="button-container">
+                    <button type="button" onclick="nextSection()">Next</button>
+                </div>
+            </div>
 
-        <label for="kernel_version">Kernel Version:</label>
-        <input type="text" id="kernel_version" name="kernel_version"><br><br>
+            <!-- Connectivity & Storage -->
+            <div class="form-section">
+                <!-- Your existing Connectivity & Storage section -->
+                <h2>Connectivity & Storage</h2>
 
-        <label for="iccid">ICCID:</label>
-        <input type="text" id="iccid" name="iccid"><br><br>
+                <div class="form-group"  style="display: inline-block;">
+                    <label>Was it connected to Wi-Fi?</label>
+                    <input type="radio" id="wifi_connected_yes" name="wifi_connected" value="yes" required>
+                    <label for="wifi_connected_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="wifi_connected_no" name="wifi_connected" value="no" required>
+                    <label for="wifi_connected_no"  style="display: inline-block;">No</label>
+                </div>
 
-        <label for="imsi">IMSI:</label>
-        <input type="text" id="imsi" name="imsi"><br><br>
+                <div class="form-group">
+                    <label>Was Bluetooth on or off?</label>
+                    <input type="radio" id="bluetooth_on" name="bluetooth_status" value="on" required>
+                    <label for="bluetooth_on"  style="display: inline-block;">On</label>
+                    <input type="radio" id="bluetooth_off" name="bluetooth_status" value="off" required>
+                    <label for="bluetooth_off"  style="display: inline-block;">Off</label>
+                </div>
 
-        <label for="meid">MEID:</label>
-        <input type="text" id="meid" name="meid"><br><br>
+                <div class="form-group">
+                    <label>Is the SD card present?</label>
+                    <input type="radio" id="sd_card_yes" name="sd_card" value="yes" required>
+                    <label for="sd_card_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="sd_card_no" name="sd_card" value="no" required>
+                    <label for="sd_card_no"  style="display: inline-block;">No</label>
+                </div>
 
-        <label for="airplane_mode">Airplane Mode (Yes/No):</label>
-        <input type="text" id="airplane_mode" name="airplane_mode"><br><br>
+                <label for="sd_capacity">SD Card Storage Capacity (if present):</label>
+                <input type="text" id="sd_capacity" name="sd_capacity" required>
 
-        <h2>Angle Detection Images</h2>
-        <label for="image_0">Upload image for 0°:</label>
-        <input type="file" id="image_0" name="image_0"><br><br>
+                
 
-        <label for="image_30">Upload image for 30°:</label>
-        <input type="file" id="image_30" name="image_30"><br><br>
+                <div class="button-container">
+                    <button type="button" onclick="previousSection()">Previous</button>
+                    <button type="button" onclick="nextSection()">Next</button>
+                </div>
+            </div>
 
-        <label for="image_60">Upload image for 60°:</label>
-        <input type="file" id="image_60" name="image_60"><br><br>
+            <!-- System Information -->
+            <div class="form-section">
+                <!-- Your existing System Information section -->
+                <h2>System Information</h2>
+                
+                <label for="mobile_uptime">Mobile Uptime:</label>
+                <input type="text" id="mobile_uptime" name="mobile_uptime" required>
+                
+                <label for="time_zone">Time Zone:</label>
+                <input type="text" id="time_zone" name="time_zone" required>
+                
+                <label for="language">Language:</label>
+                <input type="text" id="language" name="language" required>
+                
+                <label for="installed_apps">Installed Apps (with names):</label>
+                <textarea id="installed_apps" name="installed_apps" required></textarea>
+                
+                <div class="form-group"  style="display: inline-block;">
+                    <label>Was Geo-location on?</label>
+                    <input type="radio" id="geo_location_yes" name="geo_location" value="yes" required>
+                    <label for="geo_location_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="geo_location_no" name="geo_location" value="no" required>
+                    <label for="geo_location_no"  style="display: inline-block;">No</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="build_no">Build Number:</label>
+                    <input type="text" id="build_no" name="build_no" required><br><br>
+                    
+                    <label for="kernel_version">Kernel Version:</label>
+                    <input type="text" id="kernel_version" name="kernel_version" required><br><br>
+                </div>
 
-        <label for="image_90">Upload image for 90°:</label>
-        <input type="file" id="image_90" name="image_90"><br><br>
+                <div class="button-container">
+                    <button type="button" onclick="previousSection()">Previous</button>
+                    <button type="button" onclick="nextSection()">Next</button>
+                </div>
+            </div>
 
-        <label for="image_240">Upload image for 240°:</label>
-        <input type="file" id="image_240" name="image_240"><br><br>
+            <!-- Network & Identifiers -->
+            <div class="form-section">
+                <!-- Your existing Network & Identifiers section -->
+                <h2>Network & Identifiers</h2>
+                
+                <label for="iccid">ICCID:</label>
+                <input type="text" id="iccid" name="iccid"required>
+                
+                <label for="imsi">IMSI:</label>
+                <input type="text" id="imsi" name="imsi" required>
+                
+                <label for="meid">MEID:</label>
+                <input type="text" id="meid" name="meid" required>
+    
+                
+                <div class="form-group"  style="display: inline-block;">
+                    <label>Was it in Airplane Mode?</label>
+                    <input type="radio" id="airplane_mode_yes" name="airplane_mode" value="yes"  required>
+    
+                    <label for="airplane_mode_yes"  style="display: inline-block;">Yes</label>
+                    <input type="radio" id="airplane_mode_no" name="airplane_mode" value="no" required>
+                    <label for="airplane_mode_no"  style="display: inline-block;">No</label>
+                </div>
+                <div class="button-container">
+                    <button type="button" onclick="previousSection()">Previous</button>
+                    <button type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-        <label for="image_270">Upload image for 270°:</label>
-        <input type="file" id="image_270" name="image_270"><br><br>
+    <script>
+          let currentSectionIndex = 0;
+        const sections = document.querySelectorAll('.form-section');
+        
+        // Camera variables
+        let currentAngle = 0;
+        let isFlipped = false;
+        let photosTaken = 0;
+        const requiredAngles = [0, 30, 60, 90, 30, 60, 90]; // Last three are for flipped
+        const capturedImages = new Map();
+        let stream;
+        let video;
+        let canvas;
 
-        <label for="image_360">Upload image for 360°:</label>
-        <input type="file" id="image_360" name="image_360"><br><br>
+        // Guide images configuration
+        const guideImages = {
+            '0': '/static/images/guide_0.png',
+            '30': '/static/images/guide_30.png',
+            '60': '/static/images/guide_60.png',
+            '90': '/static/images/guide_90.png',
+            '30_flipped': '/static/images/guide_240.png',
+            '60_flipped': '/static/images/guide_270.png',
+            '90_flipped': '/static/images/guide_360.png'
+        };
 
-        <button type="submit">Generate Report</button>
-    </form>
+        async function initializeCamera() {
+            try {
+                video = document.getElementById('camera');
+                canvas = document.getElementById('canvas');
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Unable to access camera. Please ensure camera permissions are granted.");
+            }
+        }
+
+        function updateGuideImage() {
+            const guideImg = document.getElementById('guide-image');
+            const angle = requiredAngles[photosTaken];
+            const key = photosTaken >= 4 ? `${angle}_flipped` : `${angle}`;
+            guideImg.src = guideImages[key];
+            guideImg.alt = `Guide for ${angle}° ${photosTaken >= 4 ? '(Flipped)' : ''}`;
+        }
+
+        function capturePhoto() {
+            if (photosTaken >= 7) {
+                alert("All required photos have been taken.");
+                return;
+            }
+
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                const imageUrl = URL.createObjectURL(blob);
+                const angle = requiredAngles[photosTaken];
+
+                const file = new File([blob], `image_${photosTaken}.jpg`, { type: 'image/jpeg' });
+                
+                capturedImages.set(`image_${photosTaken}`, {
+                    file: file,
+                    angle: angle,
+                    isFlipped: photosTaken >= 4
+                });
+
+                const previewContainer = document.getElementById('preview-container');
+                const previewDiv = document.createElement('div');
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.className = 'preview-image';
+                img.alt = `Device at ${angle}° ${photosTaken >= 4 ? '(Flipped)' : ''}`;
+                previewDiv.appendChild(img);
+                previewContainer.appendChild(previewDiv);
+
+                photosTaken++;
+                updateUI();
+            }, 'image/jpeg', 0.8);
+        }
+
+        function updateUI() {
+            const photosIndicator = document.getElementById('photos-taken');
+            photosIndicator.textContent = photosTaken;
+
+            const captureText = document.getElementById('capture-text');
+            if (photosTaken < 7) {
+                const nextAngle = requiredAngles[photosTaken];
+                const isNextFlipped = photosTaken >= 4;
+                captureText.textContent = `Capture (${nextAngle}° ${isNextFlipped ? 'Flipped' : ''})`;
+                updateGuideImage();
+            } else {
+                captureText.textContent = "All photos taken";
+            }
+
+            const currentAngleSpan = document.getElementById('current-angle');
+            const flipStatus = document.getElementById('flip-status');
+            currentAngleSpan.textContent = `${requiredAngles[photosTaken] || 0}°`;
+            flipStatus.textContent = photosTaken >= 4 ? "(Flipped)" : "(Front)";
+        }
+
+        function validateAndNext() {
+            if (photosTaken < 7) {
+                alert("Please take all required photos before proceeding.");
+                return;
+            }
+            nextSection();
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function showSection(index) {
+            sections.forEach((section, i) => {
+                section.classList.toggle('active', i === index);
+                // Initialize camera when entering photography section
+                if (i === 1 && index === 1) {
+                    initializeCamera();
+                }
+            });
+        }
+
+        function validateCurrentSection() {
+            const currentSection = sections[currentSectionIndex];
+            const inputs = currentSection.querySelectorAll('input[required], textarea[required]');
+            let allValid = true;
+
+            currentSection.querySelectorAll('.input-error').forEach((elem) => {
+                elem.classList.remove('input-error');
+            });
+
+            for (const input of inputs) {
+                if (input.type === 'radio') {
+                    const name = input.name;
+                    const checked = document.querySelector(`input[name="${name}"]:checked`);
+                    if (!checked) {
+                        allValid = false;
+                        input.closest('div.form-group').querySelectorAll('input[type="radio"]').forEach((radio) => {
+                            radio.classList.add('input-error');
+                        });
+                    }
+                } else if (!input.value.trim()) {
+                    allValid = false;
+                    input.classList.add('input-error');
+                }
+            }
+
+            return allValid;
+        }
+
+        function nextSection() {
+            if (validateCurrentSection()) {
+                if (currentSectionIndex < sections.length - 1) {
+                    currentSectionIndex++;
+                    showSection(currentSectionIndex);
+                }
+            } else {
+                document.querySelector('.input-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function previousSection() {
+            if (currentSectionIndex > 0) {
+                // Stop camera if leaving photography section
+                if (currentSectionIndex === 1 && stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                currentSectionIndex--;
+                showSection(currentSectionIndex);
+            }
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', () => {
+            const captureBtn = document.getElementById('capture-btn');
+            captureBtn.addEventListener('click', capturePhoto);
+            showSection(currentSectionIndex);
+        });
+        document.querySelector('form').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Append all captured images to the form data
+            capturedImages.forEach((imageData, key) => {
+                formData.append(key, imageData.file);
+            });
+
+            // Submit the form with fetch
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Create a download link for the generated report
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `report_${formData.get('case_number')}_${new Date().toISOString().split('T')[0]}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the form');
+            });
+            
+            return false;
+        };
+    </script>
 </body>
+
 </html>
