@@ -48,6 +48,9 @@ def submit():
 
         # Load the Word template
         REPORT_TEMPLATE = os.path.join(os.getcwd(), 'Report Format.docx')
+        if not os.path.exists(REPORT_TEMPLATE):
+            raise FileNotFoundError("The Report Format.docx file is missing.")
+
         document = Document(REPORT_TEMPLATE)
 
         # Replace placeholders in paragraphs
@@ -101,6 +104,9 @@ def submit():
         buffer = io.BytesIO()
         document.save(buffer)
         buffer.seek(0)
+
+        # Verify that the buffer is not empty
+        print(f"Buffer size after saving document: {buffer.getbuffer().nbytes} bytes")
 
         # Send the modified report
         return send_file(
