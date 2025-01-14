@@ -3,15 +3,13 @@ from docx import Document
 from docx.shared import Inches
 import os
 import io
-import gridfs
-from flask_pymongo import PyMongo
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Maximum file size: 16MB
 
-# MongoDB setup
-app.config["MONGO_URI"] = "mongodb+srv://harshal:Harshal2022@cluster0.u5i2m.mongodb.net/form?retryWrites=true&w=majority&appName=Cluster0"
-mongo = PyMongo(app)
-fs = gridfs.GridFS(mongo.db)
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 @app.route('/')
 def index():
@@ -26,31 +24,46 @@ def submit():
             "Insert Date": request.form.get('date_of_report', "N/A"),
             "Insert Name and Title": request.form.get('report_prepared_by', "N/A"),
             "Insert Device Model": request.form.get('model', "N/A"),
+            "Insert Color": request.form.get('color', "N/A"),
+            "Safety Glass Yes or No": request.form.get('safety_glass', "N/A"),
+            "Back Cover Yes or No": request.form.get('back_cover', "N/A"),
             "Insert RAM": request.form.get('ram', "N/A"),
-            # Add other fields as needed
+            "Insert Internal Memory": request.form.get('internal_memory', "N/A"),
+            "Insert Camera Details": request.form.get('camera_specs', "N/A"),
+            "Insert Cameras Check": request.form.get('cameras_check', "N/A"),
+            "Insert Battery Percentage": request.form.get('battery_percentage', "N/A"),
+            "Insert SIM Slots": request.form.get('sim_slots', "N/A"),
+            "Insert SIM Provider": request.form.get('sim_provider', "N/A"),
+            "Insert Wi-Fi Status": request.form.get('wifi_connected', "N/A"),
+            "Insert Bluetooth Status": request.form.get('bluetooth_status', "N/A"),
+            "Insert SD Card Present": request.form.get('sd_card', "N/A"),
+            "Insert SD Capacity": request.form.get('sd_capacity', "N/A"),
+            "Insert Mobile Uptime": request.form.get('mobile_uptime', "N/A"),
+            "Insert Time Zone": request.form.get('time_zone', "N/A"),
+            "Insert Language": request.form.get('language', "N/A"),
+            "Insert Installed Apps": request.form.get('installed_apps', "N/A"),
+            "Insert Geo Location": request.form.get('geo_location', "N/A"),
+            "Insert Build Number": request.form.get('build_no', "N/A"),
+            "Insert Kernel Version": request.form.get('kernel_version', "N/A"),
+            "Insert ICCID": request.form.get('iccid', "N/A"),
+            "Insert IMSI": request.form.get('imsi', "N/A"),
+            "Insert MEID": request.form.get('meid', "N/A"),
+            "Insert Airplane Mode": request.form.get('airplane_mode', "N/A")
         }
 
-        # Log form data for debugging
-        print("Form data received:", form_data)
+        # Handle image upload if available
+        image_file = request.files.get('angle_image')
+        if image_file:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_file.filename)
+            image_file.save(image_path)
 
-        # Handle image uploads
-        image_ids = []
-        for i in range(7):  # Expecting 7 images for placeholders
-            image_key = f'image_{i}'
-            if image_key in request.files:
-                image_file = request.files[image_key]
-                if image_file and image_file.filename:
-                    image_data = image_file.read()
-                    # Store the image in GridFS
-                    file_id = fs.put(image_data, filename=f"device_image_{i}.jpg")
-                    image_ids.append(file_id)
-                    print(f"Stored image {i} with ID: {file_id}")
+        # Log received form data
+        print("Form data received for replacement:")
+        for key, value in form_data.items():
+            print(f"Key: {key}, Value: {value}")
 
         # Load the Word template
         REPORT_TEMPLATE = os.path.join(os.getcwd(), 'Report Format.docx')
-        if not os.path.exists(REPORT_TEMPLATE):
-            raise FileNotFoundError("The Report Format.docx file is missing.")
-
         document = Document(REPORT_TEMPLATE)
 
         # Replace placeholders in paragraphs
@@ -69,44 +82,16 @@ def submit():
                         if placeholder in cell.text:
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Replace image placeholders
-        image_placeholders = {
-            '[0]': 0,
-            '[30]': 1,
-            '[60]': 2,
-            '[90]': 3,
-            '[240]': 4,
-            '[270]': 5,
-            '[360]': 6
-        }
-
-        for placeholder, idx in image_placeholders.items():
-            if idx < len(image_ids):  # Ensure there is an image uploaded for the placeholder
-                try:
-                    # Retrieve the image from GridFS
-                    image_data = fs.get(image_ids[idx])
-                    img_stream = io.BytesIO(image_data.read())
-                    print(f"Replacing image placeholder: {placeholder} with image ID: {image_ids[idx]}")
-
-                    # Replace the placeholder with the image in the document
-                    for table in document.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                if placeholder in cell.text:
-                                    print(f"Found placeholder {placeholder} in cell, replacing with image.")
-                                    cell.text = ""  # Clear the placeholder text
-                                    run = cell.paragraphs[0].add_run()
-                                    run.add_picture(img_stream, width=Inches(2.5))
-                except Exception as e:
-                    print(f"Error inserting image for placeholder {placeholder}: {e}")
+        # Insert the image if uploaded
+        if image_file:
+            # Insert image in the document (adjust dimensions if needed)
+            document.add_paragraph("Angle Detection Image:")
+            document.add_picture(image_path, width=Inches(3))
 
         # Save the document to a buffer
         buffer = io.BytesIO()
         document.save(buffer)
         buffer.seek(0)
-
-        # Verify that the buffer is not empty
-        print(f"Buffer size after saving document: {buffer.getbuffer().nbytes} bytes")
 
         # Send the modified report
         return send_file(
