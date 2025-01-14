@@ -5,6 +5,7 @@ import os
 import io
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Required for flash messages
 
 @app.route('/')
 def index():
@@ -13,7 +14,7 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        # Extract form data (keeping existing form_data dictionary)
+        # Extract form data
         form_data = {
             "Insert Case Number": request.form.get('case_number', "N/A"),
             "Insert Date": request.form.get('date_of_report', "N/A"),
@@ -61,65 +62,70 @@ def submit():
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
+                    # Handle text replacements
                     for key, value in form_data.items():
                         placeholder = f"[{key}]"
                         if placeholder in cell.text:
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Handle images with proper mapping
-        angle_mapping = {
-            'image_0': '[0]',
-            'image_1': '[30]',
-            'image_2': '[60]',
-            'image_3': '[90]',
-            'image_4': '[240]',
-            'image_5': '[270]',
-            'image_6': '[360]'
-        }
+        # Define image mapping for sequential angles
+        angle_mapping = [
+            ('image_0', '[0]'),    # 0°
+            ('image_1', '[30]'),   # 30°
+            ('image_2', '[60]'),   # 60°
+            ('image_3', '[90]'),   # 90°
+            ('image_4', '[240]'),  # 240°
+            ('image_5', '[270]'),  # 270°
+            ('image_6', '[360]')   # 360°
+        ]
 
         # Process each image
-        for image_key, placeholder in angle_mapping.items():
+        for image_key, placeholder in angle_mapping:
             if image_key in request.files:
                 image_file = request.files[image_key]
                 if image_file and image_file.filename:
-                    print(f"Processing {image_key} with placeholder {placeholder}")
+                    print(f"Processing {image_key} for angle placeholder {placeholder}")
                     
                     # Find and replace image in all tables
                     for table in document.tables:
                         for row in table.rows:
                             for cell in row.cells:
                                 if placeholder in cell.text:
-                                    # Clear the cell text
-                                    cell.text = ""
-                                    
-                                    # Create a new paragraph for the image
-                                    paragraph = cell.paragraphs[0]
-                                    run = paragraph.add_run()
-                                    
-                                    # Reset file pointer and read image
-                                    image_file.seek(0)
-                                    image_data = io.BytesIO(image_file.read())
-                                    
-                                    # Add the image
-                                    run.add_picture(image_data, width=Inches(2.5))
-                                    print(f"Successfully inserted {image_key}")
+                                    try:
+                                        # Clear the cell
+                                        cell.text = ""
+                                        paragraph = cell.paragraphs[0]
+                                        run = paragraph.add_run()
+                                        
+                                        # Reset file pointer and read image
+                                        image_file.seek(0)
+                                        image_data = io.BytesIO(image_file.read())
+                                        
+                                        # Add image with consistent size
+                                        run.add_picture(image_data, width=Inches(2.5))
+                                        print(f"Successfully inserted {image_key} at {placeholder}")
+                                    except Exception as e:
+                                        print(f"Error processing image {image_key}: {e}")
+                                        continue
 
-        # Save the document to a buffer
+        # Save the document to buffer
         buffer = io.BytesIO()
         document.save(buffer)
         buffer.seek(0)
 
-        # Send the modified report
+        # Generate filename with case number
+        filename = f'report_{form_data["Insert Case Number"]}.docx'
+
         return send_file(
             buffer,
             as_attachment=True,
-            download_name=f'report_{form_data["Insert Case Number"]}.docx',
+            download_name=filename,
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
 
     except Exception as e:
-        print(f"Error generating the report: {e}")
-        flash("An error occurred while generating your report.", "error")
+        print(f"Error generating report: {e}")
+        flash("An error occurred while generating your report. Please try again.", "error")
         return redirect(url_for('index'))
 
 if __name__ == '__main__':
