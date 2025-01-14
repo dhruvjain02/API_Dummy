@@ -5,11 +5,6 @@ import os
 import io
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Maximum file size: 16MB
-
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 @app.route('/')
 def index():
@@ -51,12 +46,6 @@ def submit():
             "Insert Airplane Mode": request.form.get('airplane_mode', "N/A")
         }
 
-        # Handle image upload if available
-        image_file = request.files.get('angle_image')
-        if image_file:
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_file.filename)
-            image_file.save(image_path)
-
         # Log received form data
         print("Form data received for replacement:")
         for key, value in form_data.items():
@@ -82,11 +71,26 @@ def submit():
                         if placeholder in cell.text:
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Insert the image if uploaded
-        if image_file:
-            # Insert image in the document (adjust dimensions if needed)
-            document.add_paragraph("Angle Detection Image:")
-            document.add_picture(image_path, width=Inches(3))
+        # Insert images
+        image_keys = [
+            'image_0', 'image_30', 'image_60', 'image_90', 'image_240', 'image_270', 'image_360'
+        ]
+        image_placeholders = [
+            '[0]', '[30]', '[60]', '[90]', '[240]', '[270]', '[360]'
+        ]
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for placeholder, image_key in zip(image_placeholders, image_keys):
+                        if placeholder in cell.text and image_key in request.files:
+                            image_file = request.files[image_key]
+                            if image_file and image_file.filename:
+                                # Replace placeholder and insert image
+                                cell.text = ""
+                                run = cell.paragraphs[0].add_run()
+                                image_stream = io.BytesIO(image_file.read())
+                                run.add_picture(image_stream, width=Inches(2.5))
+                                print(f"Inserted image for {image_key} at {placeholder}")
 
         # Save the document to a buffer
         buffer = io.BytesIO()
