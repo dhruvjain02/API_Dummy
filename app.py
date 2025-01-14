@@ -89,9 +89,13 @@ def submit():
                                 if placeholder in cell.text:
                                     cell.text = ""
                                     run = cell.paragraphs[0].add_run()
+
+                                    # Reset the file pointer before reading
+                                    image_file.stream.seek(0)
                                     image_stream = io.BytesIO(image_file.read())
                                     run.add_picture(image_stream, width=Inches(2.5))
                                     print(f"Inserted image for {image_key} at {placeholder}")
+
 
         # Save the document to a buffer
         buffer = io.BytesIO()
