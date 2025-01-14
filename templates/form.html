@@ -308,49 +308,117 @@
                 </div>
             </div>
 
-            <!-- Device Photography -->
-            <div class="form-section">
-                <h2>Device Photography</h2>
-                <p class="instructions">Please capture photos of the device from the following angles: 0°, 30°, 60°, 90°, and after flipping: 30°, 60°, 90°</p>
+<!-- Device Photography -->
+<div class="form-section">
+    <h2>Device Photography</h2>
+    <p class="instructions">
+        Please capture photos of the device from the following angles: 0°, 30°, 60°, 90°, and after flipping: 30°, 60°, 90°.
+    </p>
 
-                <div class="split-container">
-                    <div class="camera-side">
-                        <video id="camera" autoplay playsinline class="camera-preview"></video>
-                        <canvas id="canvas" style="display: none;"></canvas>
-                        <div class="angle-indicator">
-                            <span id="current-angle">0°</span>
-                            <span id="flip-status">(Front)</span>
-                        </div>
-                        <div class="camera-controls">
-                            <button type="button" id="capture-btn" class="camera-btn">
-                                <span id="capture-text">Capture (0°)</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="guide-side">
-                        <img id="guide-image" class="guide-image" src="/static/images/guide_0.png" alt="Guide for current angle">
-                        <div class="instructions">
-                            Follow the guide image to capture the device at the correct angle
-                        </div>
-                    </div>
-                </div>
-
-                <div class="preview-grid" id="preview-container">
-                    <!-- Preview images will be added here -->
-                </div>
-
-                <div class="photo-progress">
-                    <div class="progress-indicator">
-                        <span id="photos-taken">0</span>/7 photos taken
-                    </div>
-                </div>
-
-                <div class="button-container">
-                    <button type="button" onclick="previousSection()">Previous</button>
-                    <button type="button" onclick="validateAndNext()">Next</button>
-                </div>
+    <div class="split-container">
+        <div class="camera-side">
+            <video id="camera" autoplay playsinline class="camera-preview"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <div class="angle-indicator">
+                <span id="current-angle">0°</span>
+                <span id="flip-status">(Front)</span>
             </div>
+            <div class="camera-controls">
+                <button type="button" id="capture-btn" class="camera-btn">
+                    <span id="capture-text">Capture (0°)</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="guide-side">
+            <img id="guide-image" class="guide-image" src="/static/images/guide_0.png" alt="Guide for current angle">
+            <div class="instructions">
+                Follow the guide image to capture the device at the correct angle.
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Inputs to Store Captured Images -->
+    <form id="photo-form" action="/submit" method="POST" enctype="multipart/form-data">
+        <div id="hidden-inputs">
+            <!-- Hidden inputs will be dynamically added here -->
+        </div>
+    </form>
+
+    <div class="preview-grid" id="preview-container">
+        <!-- Preview images will be added here -->
+    </div>
+
+    <div class="photo-progress">
+        <div class="progress-indicator">
+            <span id="photos-taken">0</span>/7 photos taken
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button type="button" onclick="previousSection()">Previous</button>
+        <button type="button" onclick="validateAndNext()">Next</button>
+    </div>
+</div>
+
+<script>
+    const angles = ["0", "30", "60", "90", "240", "270", "360"];
+    let currentAngleIndex = 0;
+    const camera = document.getElementById("camera");
+    const canvas = document.getElementById("canvas");
+    const previewContainer = document.getElementById("preview-container");
+    const hiddenInputs = document.getElementById("hidden-inputs");
+    const photosTaken = document.getElementById("photos-taken");
+    const captureBtn = document.getElementById("capture-btn");
+    const captureText = document.getElementById("capture-text");
+    const guideImage = document.getElementById("guide-image");
+
+    // Access the user's camera
+    navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+            camera.srcObject = stream;
+        })
+        .catch((err) => {
+            console.error("Error accessing camera:", err);
+        });
+
+    // Capture photo and store it
+    captureBtn.addEventListener("click", () => {
+        const context = canvas.getContext("2d");
+        canvas.width = camera.videoWidth;
+        canvas.height = camera.videoHeight;
+        context.drawImage(camera, 0, 0, canvas.width, canvas.height);
+
+        // Convert the captured image to a blob
+        canvas.toBlob((blob) => {
+            // Add a preview image
+            const previewImage = document.createElement("img");
+            previewImage.src = URL.createObjectURL(blob);
+            previewImage.classList.add("preview-image");
+            previewContainer.appendChild(previewImage);
+
+            // Create a hidden input for the captured image
+            const input = document.createElement("input");
+            input.type = "file";
+            input.name = `image_${angles[currentAngleIndex]}`;
+            input.files = new File([blob], `image_${angles[currentAngleIndex]}.jpg`);
+            hiddenInputs.appendChild(input);
+
+            // Update progress
+            currentAngleIndex++;
+            photosTaken.textContent = currentAngleIndex;
+            if (currentAngleIndex < angles.length) {
+                captureText.textContent = `Capture (${angles[currentAngleIndex]}°)`;
+                guideImage.src = `/static/images/guide_${angles[currentAngleIndex]}.png`;
+            } else {
+                captureText.textContent = "All photos captured!";
+                captureBtn.disabled = true;
+            }
+        });
+    });
+</script>
+
 
             <!-- Original form sections continue... -->
             <!-- Device Specifications -->
