@@ -13,7 +13,7 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        # Extract form data
+        # Extract form data (keeping existing form_data dictionary)
         form_data = {
             "Insert Case Number": request.form.get('case_number', "N/A"),
             "Insert Date": request.form.get('date_of_report', "N/A"),
@@ -46,11 +46,6 @@ def submit():
             "Insert Airplane Mode": request.form.get('airplane_mode', "N/A")
         }
 
-        # Log received form data
-        print("Form data received for replacement:")
-        for key, value in form_data.items():
-            print(f"Key: {key}, Value: {value}")
-
         # Load the Word template
         REPORT_TEMPLATE = os.path.join(os.getcwd(), 'Report Format.docx')
         document = Document(REPORT_TEMPLATE)
@@ -71,38 +66,43 @@ def submit():
                         if placeholder in cell.text:
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Insert images for each angle placeholder
-        image_keys = [
-            'image_0', 'image_30', 'image_60', 'image_90', 'image_240', 'image_270', 'image_360'
-        ]
-        image_placeholders = [
-            '[0]', '[30]', '[60]', '[90]', '[240]', '[270]', '[360]'
-        ]
-        for placeholder, image_key in zip(image_placeholders, image_keys):
+        # Handle images with proper mapping
+        angle_mapping = {
+            'image_0': '[0]',
+            'image_1': '[30]',
+            'image_2': '[60]',
+            'image_3': '[90]',
+            'image_4': '[240]',
+            'image_5': '[270]',
+            'image_6': '[360]'
+        }
+
+        # Process each image
+        for image_key, placeholder in angle_mapping.items():
             if image_key in request.files:
                 image_file = request.files[image_key]
                 if image_file and image_file.filename:
-                    # Debug: Check if the image is found and uploaded correctly
-                    print(f"Image {image_key} received with filename: {image_file.filename}")
-
-                    # Replace placeholder and insert image in all tables
-                    inserted = False  # Track if image was inserted
+                    print(f"Processing {image_key} with placeholder {placeholder}")
+                    
+                    # Find and replace image in all tables
                     for table in document.tables:
                         for row in table.rows:
                             for cell in row.cells:
                                 if placeholder in cell.text:
-                                    print(f"Inserting image for {image_key} at placeholder {placeholder}...")
-                                    cell.text = ""  # Clear the placeholder
-                                    run = cell.paragraphs[0].add_run()
+                                    # Clear the cell text
+                                    cell.text = ""
                                     
-                                    # Reset the file pointer and read the image
-                                    image_file.stream.seek(0)
-                                    image_stream = io.BytesIO(image_file.read())
-                                    run.add_picture(image_stream, width=Inches(2.5))
-                                    inserted = True
-
-                    if not inserted:
-                        print(f"No placeholder found for {image_key} in the document.")
+                                    # Create a new paragraph for the image
+                                    paragraph = cell.paragraphs[0]
+                                    run = paragraph.add_run()
+                                    
+                                    # Reset file pointer and read image
+                                    image_file.seek(0)
+                                    image_data = io.BytesIO(image_file.read())
+                                    
+                                    # Add the image
+                                    run.add_picture(image_data, width=Inches(2.5))
+                                    print(f"Successfully inserted {image_key}")
 
         # Save the document to a buffer
         buffer = io.BytesIO()
@@ -116,6 +116,7 @@ def submit():
             download_name=f'report_{form_data["Insert Case Number"]}.docx',
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
+
     except Exception as e:
         print(f"Error generating the report: {e}")
         flash("An error occurred while generating your report.", "error")
