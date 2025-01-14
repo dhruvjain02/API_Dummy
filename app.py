@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from docx import Document
-from docx.shared import Inches
 import os
-import shutil
 import io
 
 app = Flask(__name__)
@@ -15,29 +13,52 @@ def index():
 def submit():
     try:
         # Extract form data
-        form_data = {key: request.form.get(key, "N/A") for key in request.form.keys()}
-        print("Form data received:", form_data)
+        form_data = {
+            "Insert Case Number": request.form.get('case_number', "N/A"),
+            "Insert Date": request.form.get('date_of_report', "N/A"),
+            "Insert Name and Title": request.form.get('report_prepared_by', "N/A"),
+            "Insert Device Model": request.form.get('model', "N/A"),
+            "Insert Color": request.form.get('color', "N/A"),
+            "Safety Glass Yes or No": request.form.get('safety_glass', "N/A"),
+            "Back Cover Yes or No": request.form.get('back_cover', "N/A"),
+            "Insert RAM": request.form.get('ram', "N/A"),
+            "Insert Internal Memory": request.form.get('internal_memory', "N/A"),
+            "Insert Camera Details": request.form.get('camera_specs', "N/A"),
+            "Insert Cameras Check": request.form.get('cameras_check', "N/A"),
+            "Insert Battery Percentage": request.form.get('battery_percentage', "N/A"),
+            "Insert SIM Slots": request.form.get('sim_slots', "N/A"),
+            "Insert SIM Provider": request.form.get('sim_provider', "N/A"),
+            "Insert Wi-Fi Status": request.form.get('wifi_connected', "N/A"),
+            "Insert Bluetooth Status": request.form.get('bluetooth_status', "N/A"),
+            "Insert SD Card Present": request.form.get('sd_card', "N/A"),
+            "Insert SD Capacity": request.form.get('sd_capacity', "N/A"),
+            "Insert Mobile Uptime": request.form.get('mobile_uptime', "N/A"),
+            "Insert Time Zone": request.form.get('time_zone', "N/A"),
+            "Insert Language": request.form.get('language', "N/A"),
+            "Insert Installed Apps": request.form.get('installed_apps', "N/A"),
+            "Insert Geo Location": request.form.get('geo_location', "N/A"),
+            "Insert Build Number": request.form.get('build_no', "N/A"),
+            "Insert Kernel Version": request.form.get('kernel_version', "N/A"),
+            "Insert ICCID": request.form.get('iccid', "N/A"),
+            "Insert IMSI": request.form.get('imsi', "N/A"),
+            "Insert MEID": request.form.get('meid', "N/A"),
+            "Insert Airplane Mode": request.form.get('airplane_mode', "N/A")
+        }
 
-        # Path to the report template
+        # Log received form data
+        print("Form data received for replacement:")
+        for key, value in form_data.items():
+            print(f"Key: {key}, Value: {value}")
+
+        # Load the Word template
         REPORT_TEMPLATE = os.path.join(os.getcwd(), 'Report Format.docx')
-        temp_template = '/tmp/Report Format.docx'
-
-        # Copy the template to a temporary directory
-        if os.path.exists(REPORT_TEMPLATE):
-            shutil.copy(REPORT_TEMPLATE, temp_template)
-            print(f"Template copied to: {temp_template}")
-        else:
-            raise FileNotFoundError(f"Template not found at {REPORT_TEMPLATE}")
-
-        # Open the template document
-        document = Document(temp_template)
+        document = Document(REPORT_TEMPLATE)
 
         # Replace placeholders in paragraphs
         for para in document.paragraphs:
             for key, value in form_data.items():
                 placeholder = f"[{key}]"
                 if placeholder in para.text:
-                    print(f"Replacing placeholder: {placeholder} with value: {value}")
                     para.text = para.text.replace(placeholder, value)
 
         # Replace placeholders in tables
@@ -47,19 +68,18 @@ def submit():
                     for key, value in form_data.items():
                         placeholder = f"[{key}]"
                         if placeholder in cell.text:
-                            print(f"Replacing placeholder: {placeholder} in table cell with value: {value}")
                             cell.text = cell.text.replace(placeholder, value)
 
-        # Save the modified report to the /tmp directory
-        temp_path = '/tmp/generated_report.docx'
-        document.save(temp_path)
-        print(f"Report successfully saved to: {temp_path}")
+        # Save the document to a buffer
+        buffer = io.BytesIO()
+        document.save(buffer)
+        buffer.seek(0)
 
-        # Send the modified document as a downloadable file
+        # Send the modified report
         return send_file(
-            temp_path,
+            buffer,
             as_attachment=True,
-            download_name=f'report_{form_data.get("case_number", "default")}.docx',
+            download_name=f'report_{form_data["Insert Case Number"]}.docx',
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
     except Exception as e:
