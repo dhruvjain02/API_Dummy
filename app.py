@@ -1,196 +1,126 @@
-from flask import Flask, render_template, request, redirect, send_file, flash, url_for
-from flask_pymongo import PyMongo
-from bson.objectid import ObjectId
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from docx import Document
 from docx.shared import Inches
+import os
 import io
-from datetime import datetime
-import base64
-import gridfs
 
 app = Flask(__name__)
 
-
-# MongoDB setup
-app.config["MONGO_URI"] = "mongodb+srv://harshal:Harshal2022@cluster0.u5i2m.mongodb.net/form?retryWrites=true&w=majority&appName=Cluster0"
-mongo = PyMongo(app)
-fs = gridfs.GridFS(mongo.db)
-
-
-# Route for rendering the form
 @app.route('/')
 def index():
     return render_template('form.html')
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    if request.method == 'POST':
-        try:
-            # Extract form data
-            form_data = {
-                "case_number": request.form.get('case_number'),
-                "date_of_report": request.form.get('date_of_report'),
-                "report_prepared_by": request.form.get('report_prepared_by'),
-                "model": request.form.get('model'),
-                "color": request.form.get('color'),
-                "safety_glass": request.form.get('safety_glass'),
-                "back_cover": request.form.get('back_cover'),
-                "ram": request.form.get('ram'),
-                "internal_memory": request.form.get('internal_memory'),
-                "camera_specs": request.form.get('camera_specs'),
-                "cameras_check": request.form.get('cameras_check'),
-                "battery_percentage": request.form.get('battery_percentage'),
-                "sim_slots": request.form.get('sim_slots'),
-                "sim_provider": request.form.get('sim_provider'),
-                "wifi_connected": request.form.get('wifi_connected'),
-                "bluetooth_status": request.form.get('bluetooth_status'),
-                "sd_card": request.form.get('sd_card'),
-                "sd_capacity": request.form.get('sd_capacity'),
-                "mobile_uptime": request.form.get('mobile_uptime'),
-                "time_zone": request.form.get('time_zone'),
-                "language": request.form.get('language'),
-                "installed_apps": request.form.get('installed_apps'),
-                "geo_location": request.form.get('geo_location'),
-                "build_no": request.form.get('build_no'),
-                "kernel_version": request.form.get('kernel_version'),
-                "iccid": request.form.get('iccid'),
-                "imsi": request.form.get('imsi'),
-                "meid": request.form.get('meid'),
-                "airplane_mode": request.form.get('airplane_mode')
-            }
+    try:
+        # Extract form data (keeping existing form_data dictionary)
+        form_data = {
+            "Insert Case Number": request.form.get('case_number', "N/A"),
+            "Insert Date": request.form.get('date_of_report', "N/A"),
+            "Insert Name and Title": request.form.get('report_prepared_by', "N/A"),
+            "Insert Device Model": request.form.get('model', "N/A"),
+            "Insert Color": request.form.get('color', "N/A"),
+            "Safety Glass Yes or No": request.form.get('safety_glass', "N/A"),
+            "Back Cover Yes or No": request.form.get('back_cover', "N/A"),
+            "Insert RAM": request.form.get('ram', "N/A"),
+            "Insert Internal Memory": request.form.get('internal_memory', "N/A"),
+            "Insert Camera Details": request.form.get('camera_specs', "N/A"),
+            "Insert Cameras Check": request.form.get('cameras_check', "N/A"),
+            "Insert Battery Percentage": request.form.get('battery_percentage', "N/A"),
+            "Insert SIM Slots": request.form.get('sim_slots', "N/A"),
+            "Insert SIM Provider": request.form.get('sim_provider', "N/A"),
+            "Insert Wi-Fi Status": request.form.get('wifi_connected', "N/A"),
+            "Insert Bluetooth Status": request.form.get('bluetooth_status', "N/A"),
+            "Insert SD Card Present": request.form.get('sd_card', "N/A"),
+            "Insert SD Capacity": request.form.get('sd_capacity', "N/A"),
+            "Insert Mobile Uptime": request.form.get('mobile_uptime', "N/A"),
+            "Insert Time Zone": request.form.get('time_zone', "N/A"),
+            "Insert Language": request.form.get('language', "N/A"),
+            "Insert Installed Apps": request.form.get('installed_apps', "N/A"),
+            "Insert Geo Location": request.form.get('geo_location', "N/A"),
+            "Insert Build Number": request.form.get('build_no', "N/A"),
+            "Insert Kernel Version": request.form.get('kernel_version', "N/A"),
+            "Insert ICCID": request.form.get('iccid', "N/A"),
+            "Insert IMSI": request.form.get('imsi', "N/A"),
+            "Insert MEID": request.form.get('meid', "N/A"),
+            "Insert Airplane Mode": request.form.get('airplane_mode', "N/A")
+        }
 
-            # Handle image uploads
-            image_ids = []
-            print("Files received:", request.files.keys())
-            angles = [0, 30, 60, 90, 30, 60, 90]  # Last three are for flipped
-            
-            for i in range(7):
-                image_key = f'image_{i}'
-                if image_key in request.files:
-                    image_file = request.files[image_key]
-                    if image_file and image_file.filename:
-                        # Read the image data
-                        image_data = image_file.read()
-                        
-                        # Store in GridFS
-                        file_id = fs.put(
-                            image_data,
-                            filename=f"device_image_{i}.jpg",
-                            metadata={
-                                "case_number": form_data["case_number"],
-                                "angle": i,
-                                "flipped": i >= 4
-                            }
-                        )
-                        image_ids.append(file_id)
-                        print(f"Stored image {i} with ID: {file_id}")
+        # Load the Word template
+        REPORT_TEMPLATE = os.path.join(os.getcwd(), 'Report Format.docx')
+        document = Document(REPORT_TEMPLATE)
 
-            # Add image IDs to form data
-            form_data["image_ids"] = image_ids
+        # Replace placeholders in paragraphs
+        for para in document.paragraphs:
+            for key, value in form_data.items():
+                placeholder = f"[{key}]"
+                if placeholder in para.text:
+                    para.text = para.text.replace(placeholder, value)
 
-            # Insert data into MongoDB
-            mongo.db.device_info.insert_one(form_data)
-
-            # Generate report
-            document = Document('./Report Format.docx')
-            
-            # Helper function to replace text in tables
-            def replace_table_placeholder(table, placeholder, value):
-                for row in table.rows:
-                    for cell in row.cells:
+        # Replace placeholders in tables
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for key, value in form_data.items():
+                        placeholder = f"[{key}]"
                         if placeholder in cell.text:
-                            # Remove any other formatting by setting plain text
-                            cell.text = cell.text.replace(placeholder, str(value))
+                            cell.text = cell.text.replace(placeholder, value)
 
-            # Update regular placeholders
-            for para in document.paragraphs:
-                if '[Insert Case Number]' in para.text:
-                    para.text = para.text.replace('[Insert Case Number]', form_data['case_number'])
-                if '[Insert Date]' in para.text:
-                    para.text = para.text.replace('[Insert Date]', form_data['date_of_report'])
-                if '[Insert Name and Title]' in para.text:
-                    para.text = para.text.replace('[Insert Name and Title]', form_data['report_prepared_by'])
+        # Handle images with proper mapping
+        angle_mapping = {
+            'image_0': '[0]',
+            'image_1': '[30]',
+            'image_2': '[60]',
+            'image_3': '[90]',
+            'image_4': '[240]',
+            'image_5': '[270]',
+            'image_6': '[360]'
+        }
 
-            # Find the angle detection images table and update it
-            for table in document.tables:
-                if len(table.rows) >= 8:  # Table with 7 images plus header
-                    # Map of placeholders to image indices
-                    image_placeholders = {
-                        '[0]': 0,
-                        '[30]': 1,
-                        '[60]': 2,
-                        '[90]': 3,
-                        '[240]': 4,
-                        '[270]': 5,
-                        '[360]': 6
-                    }
+        # Process each image
+        for image_key, placeholder in angle_mapping.items():
+            if image_key in request.files:
+                image_file = request.files[image_key]
+                if image_file and image_file.filename:
+                    print(f"Processing {image_key} with placeholder {placeholder}")
                     
-                    for placeholder, idx in image_placeholders.items():
-                        if idx < len(image_ids):
-                            try:
-                                # Get image from GridFS
-                                image_data = fs.get(image_ids[idx])
-                                img_stream = io.BytesIO(image_data.read())
-                                
-                                # Find and replace placeholder with image
-                                for row in table.rows:
-                                    for cell in row.cells:
-                                        if placeholder in cell.text:
-                                            print(f"Found placeholder {placeholder} in cell")
-                                            # Clear the cell
-                                            cell.text = ""
-                                            # Add the image
-                                            run = cell.paragraphs[0].add_run()
-                                            run.add_picture(
-                                                img_stream, 
-                                                width=Inches(2.5)
-                                            )
-                            except Exception as e:
-                                print(f"Error processing image {idx}: {str(e)}")
+                    # Find and replace image in all tables
+                    for table in document.tables:
+                        for row in table.rows:
+                            for cell in row.cells:
+                                if placeholder in cell.text:
+                                    # Clear the cell text
+                                    cell.text = ""
+                                    
+                                    # Create a new paragraph for the image
+                                    paragraph = cell.paragraphs[0]
+                                    run = paragraph.add_run()
+                                    
+                                    # Reset file pointer and read image
+                                    image_file.seek(0)
+                                    image_data = io.BytesIO(image_file.read())
+                                    
+                                    # Add the image
+                                    run.add_picture(image_data, width=Inches(2.5))
+                                    print(f"Successfully inserted {image_key}")
 
-                # Update device specifications
-                replace_table_placeholder(table, '[Insert Device Model]', form_data['model'])
-                replace_table_placeholder(table, '[Insert Color]', form_data['color'])
-                replace_table_placeholder(table, '[Safety Glass Yes or No]', form_data['safety_glass'])
-                replace_table_placeholder(table, '[Back Cover Yes or No]', form_data['back_cover'])
-                replace_table_placeholder(table, '[Insert RAM]', form_data['ram'])
-                replace_table_placeholder(table, '[Insert Internal Memory]', form_data['internal_memory'])
-                replace_table_placeholder(table, '[Insert Camera Details]', form_data['camera_specs'])
-                replace_table_placeholder(table, '[Insert Cameras Check]', form_data['cameras_check'])
-                replace_table_placeholder(table, '[Insert Battery Percentage]', form_data['battery_percentage'])
-                replace_table_placeholder(table, '[Insert SIM Slots]', form_data['sim_slots'])
-                replace_table_placeholder(table, '[Insert SIM Provider]', form_data['sim_provider'])
-                replace_table_placeholder(table, '[Insert Wi-Fi Status]', form_data['wifi_connected'])
-                replace_table_placeholder(table, '[Insert Bluetooth Status]', form_data['bluetooth_status'])
-                replace_table_placeholder(table, '[Insert SD Card Present]', form_data['sd_card'])
-                replace_table_placeholder(table, '[Insert SD Capacity]', form_data['sd_capacity'])
-                replace_table_placeholder(table, '[Insert Mobile Uptime]', form_data['mobile_uptime'])
-                replace_table_placeholder(table, '[Insert Time Zone]', form_data['time_zone'])
-                replace_table_placeholder(table, '[Insert Language]', form_data['language'])
-                replace_table_placeholder(table, '[Insert Installed Apps]', form_data['installed_apps'])
-                replace_table_placeholder(table, '[Insert Geo Location]', form_data['geo_location'])
-                replace_table_placeholder(table, '[Insert Build Number]', form_data['build_no'])
-                replace_table_placeholder(table, '[Insert Kernel Version]', form_data['kernel_version'])
-                replace_table_placeholder(table, '[Insert ICCID]', form_data['iccid'])
-                replace_table_placeholder(table, '[Insert IMSI]', form_data['imsi'])
-                replace_table_placeholder(table, '[Insert MEID]', form_data['meid'])
-                replace_table_placeholder(table, '[Insert Airplane Mode]', form_data['airplane_mode'])
+        # Save the document to a buffer
+        buffer = io.BytesIO()
+        document.save(buffer)
+        buffer.seek(0)
 
-            # Save document to buffer
-            buffer = io.BytesIO()
-            document.save(buffer)
-            buffer.seek(0)
-            
+        # Send the modified report
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f'report_{form_data["Insert Case Number"]}.docx',
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
 
-            # Send file
-            return send_file(buffer, as_attachment=True, download_name=f'report_{form_data["case_number"]}.docx', mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-
-
-        except Exception as e:
-            print(f"Error processing form: {str(e)}")
-            app.logger.error(f"Error processing form: {str(e)}")
-            flash('An error occurred while processing your form', 'error')
-            return redirect(url_for('index'))
+    except Exception as e:
+        print(f"Error generating the report: {e}")
+        flash("An error occurred while generating your report.", "error")
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
