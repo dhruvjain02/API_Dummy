@@ -1,27 +1,37 @@
-
 # Mobile Device Information Capture System
 
-This project is a web application designed to capture and process mobile device information for forensic purposes. It uses Flask as the backend framework and MongoDB as the database. The frontend is a multi-step HTML form that allows users to input device details, upload images of the device at specific angles, and generate a report.
-
----
+A comprehensive web application designed for forensic documentation of mobile devices. This Flask-based system enables detailed device information capture, systematic photography, and automated report generation in DOCX format.
 
 ## Features
 
-- **Multi-Step Form**: Collects detailed information about the mobile device, including system, network, and physical specifications.
-- **Image Capture**: Captures device images at specific angles (0°, 30°, 60°, 90°, and flipped views).
-- **Report Generation**: Generates a Word report (`.docx`) using a pre-defined template with placeholders replaced by form data and embedded images.
-- **MongoDB Integration**: Stores form data and uploaded images in MongoDB using GridFS for image storage.
-- **Responsive Design**: Frontend designed for ease of use on multiple devices.
+- **Multi-Step Form Interface**
+  - Structured data collection across multiple categories
+  - Real-time validation and error checking
+  - Responsive design for various screen sizes
 
----
+- **Device Photography System**
+  - Systematic capture of device images at specific angles (0°, 30°, 60°, 90°, and flipped views)
+  - Live camera preview with angle guides
+  - Image quality preservation for documentation
+
+- **Automated Report Generation**
+  - Generates professional DOCX reports using customizable templates
+  - Automatically embeds captured images
+  - Standardized formatting for forensic documentation
+
+- **Comprehensive Data Collection**
+  - Device specifications and physical characteristics
+  - Network and connectivity information
+  - System information and identifiers
+  - Security and status indicators
 
 ## Prerequisites
 
 - Python 3.7+
-- MongoDB Atlas (or local MongoDB setup)
-- Required Python packages (see [Installation](#installation))
-
----
+- Camera access (built-in or external) for device photography
+- Required Python packages (specified in requirements.txt)
+- Sufficient storage space for image processing
+- Modern web browser with JavaScript enabled
 
 ## Installation
 
@@ -31,103 +41,147 @@ This project is a web application designed to capture and process mobile device 
    cd <repository-folder>
    ```
 
-2. **Install Dependencies**
+2. **Create Virtual Environment (Recommended)**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set Up MongoDB**
-   - Update `app.config["MONGO_URI"]` in `app.py` with your MongoDB connection string.
+4. **Set Up Directory Structure**
+   ```bash
+   mkdir -p static/images
+   mkdir -p templates
+   ```
 
-4. **Run the Application**
+5. **Configure Template**
+   - Ensure "Report Format.docx" is placed in the root directory
+   - Verify template contains correct placeholder tags
+
+6. **Set Environment Variables**
+   ```bash
+   # Development environment
+   export FLASK_APP=app.py
+   export FLASK_ENV=development
+   ```
+
+7. **Run the Application**
    ```bash
    python app.py
    ```
 
-5. **Access the App**
-   Open a browser and navigate to `http://127.0.0.1:5000`.
-
----
-
 ## Usage
 
-### Frontend Form (`form.html`)
+### Landing Page
+- Access the application at `http://localhost:5000`
+- Click "Let's Get Started" to begin the documentation process
 
-1. **Case Details**:
-   - Input case number, date of report, and preparer's details.
+### Documentation Process
 
-2. **Device Photography**:
-   - Capture device images at specified angles using the camera preview.
+1. **Case Information**
+   - Enter case number
+   - Input report date
+   - Provide preparer's information
 
-3. **Device Specifications**:
-   - Input details such as model, RAM, internal memory, and camera specifications.
+2. **Device Photography**
+   - Follow the angle guides for each required photo
+   - Required angles: 0°, 30°, 60°, 90°, and flipped views
+   - Verify image quality before proceeding
 
-4. **Connectivity & Storage**:
-   - Provide details about Wi-Fi, Bluetooth, and SD card status.
+3. **Device Specifications**
+   - Document physical characteristics
+   - Record device model and specifications
+   - Note safety features and accessories
 
-5. **System Information**:
-   - Input uptime, time zone, language, installed apps, and geolocation status.
+4. **System Information**
+   - Record software versions
+   - Document system settings
+   - List installed applications
 
-6. **Network & Identifiers**:
-   - Input ICCID, IMSI, MEID, and airplane mode status.
+5. **Network & Security**
+   - Document connectivity status
+   - Record device identifiers
+   - Note security settings
 
-7. Submit the form to generate a report and download it.
+### Report Generation
+- System automatically generates a DOCX report
+- Report includes all documented information and photos
+- Downloaded automatically upon form submission
 
----
+## Technical Details
 
-## Key Files
+### Security Measures
+- Maximum file size: 16MB
+- Allowed image formats: .png, .jpg, .jpeg
+- Input validation on all fields
+- Secure file handling
 
-1. **Backend: `app.py`**
-   - Flask application that handles form submission, image uploads, and report generation.
+### Error Handling
+- Comprehensive error logging
+- User-friendly error messages
+- Automatic cleanup of temporary files
 
-2. **Frontend: `form.html`**
-   - Multi-step form with JavaScript for dynamic navigation and validations.
+### File Structure
+```
+project/
+├── app.py              # Main application file
+├── requirements.txt    # Python dependencies
+├── Report Format.docx  # Report template
+├── static/
+│   └── images/        # Static assets
+└── templates/         # HTML templates
+    ├── form.html
+    ├── index.html
+    └── thankyou.html
+```
 
----
+## Deployment
 
-## MongoDB Integration
+### Development
+```bash
+python app.py
+```
 
-- **GridFS**: Used to store and retrieve device images.
-- **Collections**:
-  - `device_info`: Stores metadata and form data.
+### Production (Vercel)
+- Configure vercel.json settings
+- Deploy using Vercel CLI or GitHub integration
+- Ensure environment variables are set in Vercel dashboard
 
----
+## Troubleshooting
 
-## Report Generation
+Common Issues:
+1. **Camera Access Denied**
+   - Check browser permissions
+   - Ensure HTTPS in production
 
-- **Template**: `Report Format.docx` is used as a base.
-- **Dynamic Replacement**: Placeholders in the template are replaced with form data.
-- **Images**: Captured images are embedded in the report.
+2. **Report Generation Fails**
+   - Verify template file presence
+   - Check write permissions
+   - Validate form data completeness
 
----
-
-## Technologies Used
-
-- **Backend**: Flask, PyMongo, GridFS
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: MongoDB Atlas
-- **Report Generation**: Python-docx
-
----
+3. **Image Upload Issues**
+   - Verify file size limits
+   - Check supported formats
+   - Ensure stable connection
 
 ## Future Enhancements
 
-- Add error handling for camera access issues.
-- Implement additional validations on form inputs.
-- Optimize MongoDB queries and improve GridFS image handling.
-- Add support for exporting reports in PDF format.
-
----
+- PDF report format option
+- Additional device photography angles
+- Enhanced image processing capabilities
+- Offline mode support
+- Multi-language support
 
 ## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## Contact
+## Support
 
 For any queries, contact the developer:
 
-**Harshal Thoke**  
-[Portfolio](https://harshuthoke.github.io/Harshal_Portfolio/7)
+**Dhruv Jain**  
