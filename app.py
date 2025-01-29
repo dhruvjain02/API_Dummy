@@ -8,6 +8,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/form')
+def form():
     return render_template('form.html')
 
 @app.route('/submit', methods=['POST'])
@@ -115,7 +119,7 @@ def submit():
             as_attachment=True,
             download_name=f'report_{form_data["Insert Case Number"]}.docx',
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
+        ),  redirect(url_for('thankyou'))
 
     except Exception as e:
         print(f"Error generating the report: {e}")
