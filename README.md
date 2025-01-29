@@ -1,187 +1,136 @@
 # Mobile Device Information Capture System
 
-A comprehensive web application designed for forensic documentation of mobile devices. This Flask-based system enables detailed device information capture, systematic photography, and automated report generation in DOCX format.
+A web application for capturing and documenting mobile device information for forensic purposes. The system allows users to input device details, capture photos from specific angles, and generate standardized reports.
 
 ## Features
 
-- **Multi-Step Form Interface**
-  - Structured data collection across multiple categories
-  - Real-time validation and error checking
-  - Responsive design for various screen sizes
-
-- **Device Photography System**
-  - Systematic capture of device images at specific angles (0°, 30°, 60°, 90°, and flipped views)
-  - Live camera preview with angle guides
-  - Image quality preservation for documentation
-
-- **Automated Report Generation**
-  - Generates professional DOCX reports using customizable templates
-  - Automatically embeds captured images
-  - Standardized formatting for forensic documentation
-
-- **Comprehensive Data Collection**
-  - Device specifications and physical characteristics
-  - Network and connectivity information
-  - System information and identifiers
-  - Security and status indicators
-
-## Prerequisites
-
-- Python 3.7+
-- Camera access (built-in or external) for device photography
-- Required Python packages (specified in requirements.txt)
-- Sufficient storage space for image processing
-- Modern web browser with JavaScript enabled
+- Multi-step form for device information capture
+- Device photography with angle guides (0°, 30°, 60°, 90°)
+- Automated report generation in DOCX format
+- User-friendly interface
+- Real-time validation
 
 ## Installation
 
-1. **Clone the Repository**
-   ```bash
+### Windows
+
+1. Make sure Python 3.7 or higher is installed:
+   ```
+   python --version
+   ```
+
+2. Clone the repository:
+   ```
    git clone <repository-url>
-   cd <repository-folder>
+   cd <project-folder>
    ```
 
-2. **Create Virtual Environment (Recommended)**
-   ```bash
+3. Create a virtual environment:
+   ```
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   venv\Scripts\activate
    ```
 
-3. **Install Dependencies**
-   ```bash
+4. Install required packages:
+   ```
    pip install -r requirements.txt
    ```
 
-4. **Set Up Directory Structure**
-   ```bash
-   mkdir -p static/images
-   mkdir -p templates
+### Linux/Mac
+
+1. Make sure Python 3.7 or higher is installed:
+   ```
+   python3 --version
    ```
 
-5. **Configure Template**
-   - Ensure "Report Format.docx" is placed in the root directory
-   - Verify template contains correct placeholder tags
-
-6. **Set Environment Variables**
-   ```bash
-   # Development environment
-   export FLASK_APP=app.py
-   export FLASK_ENV=development
+2. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd <project-folder>
    ```
 
-7. **Run the Application**
-   ```bash
+3. Create a virtual environment:
+   ```
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+4. Install required packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Running the Application
+
+1. Create required directories:
+   ```
+   mkdir -p static/images templates
+   ```
+
+2. Set environment variables:
+   - Windows:
+     ```
+     set FLASK_APP=app.py
+     set FLASK_ENV=development
+     ```
+   - Linux/Mac:
+     ```
+     export FLASK_APP=app.py
+     export FLASK_ENV=development
+     ```
+
+3. Start the application:
+   ```
    python app.py
+   ```
+
+4. Open your web browser and go to:
+   ```
+   http://localhost:5000
    ```
 
 ## Usage
 
-### Landing Page
-- Access the application at `http://localhost:5000`
-- Click "Let's Get Started" to begin the documentation process
+1. Click "Let's Get Started" on the landing page
+2. Fill in case information
+3. Follow the photography guide to capture device images
+4. Complete device specifications
+5. Submit the form to generate report
 
-### Documentation Process
-
-1. **Case Information**
-   - Enter case number
-   - Input report date
-   - Provide preparer's information
-
-2. **Device Photography**
-   - Follow the angle guides for each required photo
-   - Required angles: 0°, 30°, 60°, 90°, and flipped views
-   - Verify image quality before proceeding
-
-3. **Device Specifications**
-   - Document physical characteristics
-   - Record device model and specifications
-   - Note safety features and accessories
-
-4. **System Information**
-   - Record software versions
-   - Document system settings
-   - List installed applications
-
-5. **Network & Security**
-   - Document connectivity status
-   - Record device identifiers
-   - Note security settings
-
-### Report Generation
-- System automatically generates a DOCX report
-- Report includes all documented information and photos
-- Downloaded automatically upon form submission
-
-## Technical Details
-
-### Security Measures
-- Maximum file size: 16MB
-- Allowed image formats: .png, .jpg, .jpeg
-- Input validation on all fields
-- Secure file handling
-
-### Error Handling
-- Comprehensive error logging
-- User-friendly error messages
-- Automatic cleanup of temporary files
-
-### File Structure
+## Project Structure
 ```
 project/
-├── app.py              # Main application file
-├── requirements.txt    # Python dependencies
-├── Report Format.docx  # Report template
+├── app.py                 # Main application file
+├── requirements.txt       # Python dependencies
+├── Report Format.docx     # Report template
 ├── static/
-│   └── images/        # Static assets
-└── templates/         # HTML templates
+│   └── images/           # Static assets
+└── templates/            # HTML templates
     ├── form.html
     ├── index.html
     └── thankyou.html
 ```
 
-## Deployment
-
-### Development
-```bash
-python app.py
-```
-
-### Production (Vercel)
-- Configure vercel.json settings
-- Deploy using Vercel CLI or GitHub integration
-- Ensure environment variables are set in Vercel dashboard
-
 ## Troubleshooting
 
-Common Issues:
-1. **Camera Access Denied**
-   - Check browser permissions
-   - Ensure HTTPS in production
+1. **ModuleNotFoundError**:
+   - Make sure virtual environment is activated
+   - Reinstall requirements: `pip install -r requirements.txt`
 
-2. **Report Generation Fails**
-   - Verify template file presence
-   - Check write permissions
-   - Validate form data completeness
+2. **Template Not Found**:
+   - Verify directories are created: `static/images` and `templates`
+   - Check file paths are correct
 
-3. **Image Upload Issues**
-   - Verify file size limits
-   - Check supported formats
-   - Ensure stable connection
-
-## Future Enhancements
-
-- PDF report format option
-- Additional device photography angles
-- Enhanced image processing capabilities
-- Offline mode support
-- Multi-language support
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+3. **Camera Not Working**:
+   - Allow camera permissions in browser
+   - Try a different browser (Chrome recommended)
 
 ## Support
 
-For any queries, contact the developer:
+For any queries, contact:
 
 **Dhruv Jain**  
+
+## License
+
+This project is licensed under the MIT License.
