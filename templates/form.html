@@ -704,6 +704,12 @@
             captureBtn.addEventListener('click', capturePhoto);
             showSection(currentSectionIndex);
         });
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', () => {
+            const captureBtn = document.getElementById('capture-btn');
+            captureBtn.addEventListener('click', capturePhoto);
+            showSection(currentSectionIndex);
+        });
         document.querySelector('form').onsubmit = function(e) {
             e.preventDefault();
             
