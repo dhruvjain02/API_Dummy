@@ -20,45 +20,43 @@
         }
 
         .popup {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
-        }
+    background: #000000;  /* Changed from white to black */
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+}
 
-        .icon {
-            margin-bottom: 20px;
-        }
+/* Also update these classes for better contrast */
+.title {
+    color: #01BAF0;  /* Changed to DeepCytes blue */
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
 
-        .title {
-            color: #012e42;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
+.description {
+    color: #ffffff;  /* Changed to white for better visibility on black */
+    margin-bottom: 25px;
+}
 
-        .description {
-            color: #022937;
-            margin-bottom: 25px;
-        }
+/* Optional: Update the button styling to match DeepCytes theme */
+.dismiss-btn button {
+    background-color: #01BAF0;  /* Changed to match DeepCytes blue */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
 
-        .dismiss-btn button {
-            background-color: #0077b6;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .dismiss-btn button:hover {
-            background-color: #005f8d;
-        }
+.dismiss-btn button:hover {
+    background-color: #0077b6;
+}
     </style>
 </head>
 <body>
