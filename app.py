@@ -29,6 +29,10 @@ def index():
         logger.error(f"Error rendering index page: {str(e)}")
         return "An error occurred while loading the page", 500
 
+@app.route('/static/css/<path:filename>')
+def serve_css(filename):
+    return send_from_directory('static/css', filename)
+
 @app.route('/form')
 def form():
     """Render the form page."""
