@@ -711,38 +711,49 @@
             showSection(currentSectionIndex);
         });
         document.querySelector('form').onsubmit = function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            // Append all captured images to the form data
-            capturedImages.forEach((imageData, key) => {
-                formData.append(key, imageData.file);
-            });
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Append all captured images to the form data
+    capturedImages.forEach((imageData, key) => {
+        formData.append(key, imageData.file);
+    });
 
-            // Submit the form with fetch
-            fetch('/submit', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.blob())
-            .then(blob => {
-                // Create a download link for the generated report
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `report_${formData.get('case_number')}_${new Date().toISOString().split('T')[0]}.docx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting the form');
-            });
-            
-            return false;
-        };
+    // Submit the form with fetch
+    fetch('/submit', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error) });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // Create a download link for the generated report
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `report_${formData.get('case_number')}_${new Date().toISOString().split('T')[0]}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Using a longer delay for redirect to ensure download starts
+        setTimeout(() => {
+            console.log("Redirecting to thank you page..."); // Debug log
+            window.location.href = '/thankyou';
+        }, 2000); // Increased to 2 seconds
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the form: ' + error.message);
+    });
+    
+    return false;
+};
     </script>
 </body>
 
